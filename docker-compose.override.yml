@@ -1,0 +1,22 @@
+# Override file for local development customizations
+# This file is optional and can be used to override settings in docker-compose.yml
+# Add this file to .gitignore if you want local-only customizations
+
+version: '3.8'
+
+services:
+  backend:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
+      - Logging__LogLevel__Microsoft=Information
+      - Logging__LogLevel__Microsoft.Hosting.Lifetime=Information
+    
+  frontend:
+    environment:
+      - NODE_ENV=development
+    
+  sqlserver:
+    # Optional: Use a specific port mapping if 1433 is already in use
+    # ports:
+    #   - "1434:1433"
