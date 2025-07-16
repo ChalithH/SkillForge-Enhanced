@@ -16,6 +16,9 @@ RUN dotnet restore
 # Copy the rest of the application
 COPY . .
 
+# Ensure the NuGet packages directory is writable
+RUN mkdir -p /root/.nuget/packages && chmod -R 777 /root/.nuget
+
 # Expose port
 EXPOSE 5000
 
