@@ -1,15 +1,5 @@
 namespace SkillForge.Api.Services
 {
-    public interface IAuthService
-    {
-        // Interface will be implemented later
-    }
-    
-    public class AuthService : IAuthService
-    {
-        // Implementation will be added later
-    }
-    
     public interface IUserService
     {
         // Interface will be implemented later
