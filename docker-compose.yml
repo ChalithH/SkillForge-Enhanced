@@ -15,7 +15,8 @@ services:
       - ./backend:/app
       - backend-nuget-cache:/root/.nuget/packages
     depends_on:
-      - sqlserver
+      sqlserver:
+        condition: service_healthy
     networks:
       - skillforge-network
 
@@ -41,14 +42,15 @@ services:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${SA_PASSWORD}
       - MSSQL_PID=Express
+      - MSSQL_MEMORY_LIMIT_MB=1024
     volumes:
       - sqlserver-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 3s
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -C -Q 'SELECT 1' || exit 1"]
+      interval: 30s
+      timeout: 10s
       retries: 10
-      start_period: 10s
+      start_period: 40s
     networks:
       - skillforge-network
 
