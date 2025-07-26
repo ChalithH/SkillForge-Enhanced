@@ -5,21 +5,24 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AppInitializer } from './components/AppInitializer';
+import { ToastProvider } from './contexts/ToastContext';
 
 function App() {
   return (
     <BrowserRouter>
-      <AppInitializer>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-        </Routes>
-      </AppInitializer>
+      <ToastProvider>
+        <AppInitializer>
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+          </Routes>
+        </AppInitializer>
+      </ToastProvider>
     </BrowserRouter>
   );
 }
