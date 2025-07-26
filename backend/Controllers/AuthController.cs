@@ -97,5 +97,96 @@ namespace SkillForge.Api.Controllers
                 return StatusCode(500, new { message = "An error occurred while fetching user data." });
             }
         }
+
+        [HttpPut("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto updateProfileDto)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out var id))
+                {
+                    return Unauthorized();
+                }
+
+                var updatedUser = await _authService.UpdateProfileAsync(id, updateProfileDto);
+                if (updatedUser == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new
+                {
+                    id = updatedUser.Id,
+                    email = updatedUser.Email,
+                    name = updatedUser.Name,
+                    timeCredits = updatedUser.TimeCredits,
+                    bio = updatedUser.Bio,
+                    profileImageUrl = updatedUser.ProfileImageUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile");
+                return StatusCode(500, new { message = "An error occurred while updating profile." });
+            }
+        }
+
+        [HttpPost("profile/image")]
+        [Authorize]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadProfileImage(IFormFile image)
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out var id))
+                {
+                    return Unauthorized();
+                }
+
+                if (image == null || image.Length == 0)
+                {
+                    return BadRequest(new { message = "No image file provided." });
+                }
+
+                var relativePath = await _authService.SaveProfileImageAsync(image, id);
+                if (relativePath == null)
+                {
+                    return BadRequest(new { message = "Failed to save image." });
+                }
+
+                // Convert relative path to full URL
+                var baseUrl = $"{Request.Scheme}://{Request.Host}";
+                var fullImageUrl = $"{baseUrl}{relativePath}";
+
+                // Update user's profile image URL
+                var updateDto = new UpdateProfileDto
+                {
+                    Name = "", // Will be ignored since we're only updating the image
+                    ProfileImageUrl = fullImageUrl
+                };
+
+                var user = await _authService.GetUserByIdAsync(id);
+                if (user != null)
+                {
+                    updateDto.Name = user.Name;
+                    updateDto.Bio = user.Bio;
+                    await _authService.UpdateProfileAsync(id, updateDto);
+                }
+
+                return Ok(new { imageUrl = fullImageUrl });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading profile image");
+                return StatusCode(500, new { message = "An error occurred while uploading image." });
+            }
+        }
     }
 }
