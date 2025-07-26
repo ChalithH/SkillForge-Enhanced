@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
-import { Skill, UserSkill, User } from '../../types';
+import { Skill, UserSkill, User, ProfileUpdateData } from '../../types';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -104,7 +104,7 @@ export const apiSlice = createApi({
     }),
     
     // User profile endpoints
-    updateProfile: builder.mutation({
+    updateProfile: builder.mutation<User, ProfileUpdateData>({
       query: (profileData) => ({
         url: '/users/profile',
         method: 'PUT',

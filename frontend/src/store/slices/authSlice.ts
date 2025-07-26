@@ -63,6 +63,11 @@ const authSlice = createSlice({
         state.user.timeCredits = action.payload;
       }
     },
+    updateUserProfile: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -127,5 +132,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, updateTimeCredits } = authSlice.actions;
+export const { logout, clearError, updateTimeCredits, updateUserProfile } = authSlice.actions;
 export default authSlice.reducer;

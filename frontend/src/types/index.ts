@@ -41,3 +41,10 @@ export interface RegisterRequest {
   password: string;
   name: string;
 }
+
+export interface ProfileUpdateData {
+  name: string;
+  email: string;
+  bio?: string;
+  profileImageUrl?: string;
+}
