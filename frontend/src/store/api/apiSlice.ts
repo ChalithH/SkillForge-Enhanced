@@ -106,15 +106,15 @@ export const apiSlice = createApi({
     // User profile endpoints
     updateProfile: builder.mutation<User, ProfileUpdateData>({
       query: (profileData) => ({
-        url: '/users/profile',
+        url: '/auth/profile',
         method: 'PUT',
         body: profileData,
       }),
       invalidatesTags: ['User'],
     }),
-    uploadProfileImage: builder.mutation({
+    uploadProfileImage: builder.mutation<{imageUrl: string}, FormData>({
       query: (formData) => ({
-        url: '/users/profile/image',
+        url: '/auth/profile/image',
         method: 'POST',
         body: formData,
       }),

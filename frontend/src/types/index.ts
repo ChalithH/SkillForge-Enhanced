@@ -44,7 +44,6 @@ export interface RegisterRequest {
 
 export interface ProfileUpdateData {
   name: string;
-  email: string;
   bio?: string;
   profileImageUrl?: string;
 }
