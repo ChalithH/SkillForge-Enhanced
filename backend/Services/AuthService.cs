@@ -14,6 +14,7 @@ namespace SkillForge.Api.Services
         Task<AuthResponseDto?> RegisterAsync(RegisterDto registerDto);
         Task<AuthResponseDto?> LoginAsync(LoginDto loginDto);
         string GenerateJwtToken(User user);
+        Task<User?> GetUserByIdAsync(int id);
     }
 
     public class AuthService : IAuthService
@@ -111,6 +112,11 @@ namespace SkillForge.Api.Services
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            return await _context.Users.FindAsync(id);
         }
     }
 }

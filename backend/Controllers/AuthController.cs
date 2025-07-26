@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SkillForge.Api.DTOs.Auth;
 using SkillForge.Api.Services;
+using System.Security.Claims;
 
 namespace SkillForge.Api.Controllers
 {
@@ -58,6 +60,41 @@ namespace SkillForge.Api.Controllers
             {
                 _logger.LogError(ex, "Error during user login");
                 return StatusCode(500, new { message = "An error occurred during login." });
+            }
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out var id))
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _authService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(new
+                {
+                    id = user.Id,
+                    email = user.Email,
+                    name = user.Name,
+                    timeCredits = user.TimeCredits,
+                    bio = user.Bio,
+                    profileImageUrl = user.ProfileImageUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting current user");
+                return StatusCode(500, new { message = "An error occurred while fetching user data." });
             }
         }
     }
