@@ -20,16 +20,6 @@ namespace SkillForge.Api.Services
         // Implementation will be added later
     }
     
-    public interface IExchangeService
-    {
-        // Interface will be implemented later
-    }
-    
-    public class ExchangeService : IExchangeService
-    {
-        // Implementation will be added later
-    }
-    
     public interface IMatchingService
     {
         // Interface will be implemented later
