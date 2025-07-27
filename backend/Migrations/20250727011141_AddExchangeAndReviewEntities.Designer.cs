@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SkillForge.Api.Data;
 
@@ -11,9 +12,11 @@ using SkillForge.Api.Data;
 namespace SkillForge.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250727011141_AddExchangeAndReviewEntities")]
+    partial class AddExchangeAndReviewEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,56 +24,6 @@ namespace SkillForge.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("SkillForge.Api.Models.CreditTransaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BalanceAfter")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int?>("ExchangeId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int?>("RelatedUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TransactionType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExchangeId");
-
-                    b.HasIndex("RelatedUserId");
-
-                    b.HasIndex("UserId", "CreatedAt")
-                        .HasDatabaseName("IX_CreditTransaction_UserId_CreatedAt");
-
-                    b.ToTable("CreditTransactions");
-                });
 
             modelBuilder.Entity("SkillForge.Api.Models.Review", b =>
                 {
@@ -278,31 +231,6 @@ namespace SkillForge.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserSkills");
-                });
-
-            modelBuilder.Entity("SkillForge.Api.Models.CreditTransaction", b =>
-                {
-                    b.HasOne("SkillForge.Api.Models.SkillExchange", "Exchange")
-                        .WithMany()
-                        .HasForeignKey("ExchangeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SkillForge.Api.Models.User", "RelatedUser")
-                        .WithMany()
-                        .HasForeignKey("RelatedUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("SkillForge.Api.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Exchange");
-
-                    b.Navigation("RelatedUser");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SkillForge.Api.Models.Review", b =>

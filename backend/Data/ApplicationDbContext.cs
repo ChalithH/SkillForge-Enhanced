@@ -15,6 +15,7 @@ namespace SkillForge.Api.Data
         public DbSet<UserSkill> UserSkills { get; set; }
         public DbSet<SkillExchange> SkillExchanges { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<CreditTransaction> CreditTransactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -109,6 +110,34 @@ namespace SkillForge.Api.Data
             modelBuilder.Entity<Review>()
                 .Property(r => r.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
+
+            // Configure CreditTransaction relationships
+            modelBuilder.Entity<CreditTransaction>()
+                .HasOne(ct => ct.User)
+                .WithMany()
+                .HasForeignKey(ct => ct.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CreditTransaction>()
+                .HasOne(ct => ct.RelatedUser)
+                .WithMany()
+                .HasForeignKey(ct => ct.RelatedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CreditTransaction>()
+                .HasOne(ct => ct.Exchange)
+                .WithMany()
+                .HasForeignKey(ct => ct.ExchangeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CreditTransaction>()
+                .Property(ct => ct.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            // Create index for efficient querying
+            modelBuilder.Entity<CreditTransaction>()
+                .HasIndex(ct => new { ct.UserId, ct.CreatedAt })
+                .HasDatabaseName("IX_CreditTransaction_UserId_CreatedAt");
         }
     }
 }
