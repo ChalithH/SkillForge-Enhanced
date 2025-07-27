@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
-import { Skill, UserSkill, User, ProfileUpdateData, CreateUserSkillRequest } from '../../types';
+import { Skill, UserSkill, User, ProfileUpdateData, CreateUserSkillRequest, SkillExchange, ExchangeStatus, CreateExchangeRequest } from '../../types';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -176,25 +176,58 @@ export const apiSlice = createApi({
     }),
     
     // Exchange endpoints
-    getExchanges: builder.query({
-      query: (status?: string) => `/exchanges${status ? `?status=${status}` : ''}`,
+    getExchanges: builder.query<SkillExchange[], ExchangeStatus | undefined>({
+      query: (status) => `/exchanges${status !== undefined ? `?status=${status}` : ''}`,
       providesTags: ['Exchange'],
     }),
-    createExchange: builder.mutation({
+    createExchange: builder.mutation<SkillExchange, CreateExchangeRequest>({
       query: (exchangeData) => ({
         url: '/exchanges',
         method: 'POST',
         body: exchangeData,
       }),
       invalidatesTags: ['Exchange'],
+      onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          
+          // Creating an exchange doesn't immediately affect credits, but refresh for consistency
+          // Credits are transferred when exchange is completed, not when created
+          // This ensures the UI shows the most up-to-date information
+          const { loadUser } = await import('../slices/authSlice');
+          dispatch(loadUser());
+        } catch (error) {
+          console.error('Failed to create exchange:', error);
+        }
+      },
     }),
-    updateExchangeStatus: builder.mutation({
+    updateExchangeStatus: builder.mutation<SkillExchange, { id: number; status: ExchangeStatus }>({
       query: ({ id, status }) => ({
         url: `/exchanges/${id}/status`,
         method: 'PUT',
         body: { status },
       }),
       invalidatesTags: ['Exchange'],
+      onQueryStarted: async ({ status }, { dispatch, queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          
+          // If exchange was completed, refresh user data to get updated credits
+          if (status === ExchangeStatus.Completed) {
+            // Import loadUser action dynamically to avoid circular imports
+            const { loadUser } = await import('../slices/authSlice');
+            dispatch(loadUser());
+          }
+        } catch (error) {
+          console.error('Failed to update exchange status:', error);
+        }
+      },
+    }),
+    
+    // User endpoints
+    getCurrentUser: builder.query<User, void>({
+      query: () => '/auth/me',
+      providesTags: ['User'],
     }),
     
     // Review endpoints
@@ -225,6 +258,7 @@ export const {
   useGetExchangesQuery,
   useCreateExchangeMutation,
   useUpdateExchangeStatusMutation,
+  useGetCurrentUserQuery,
   useCreateReviewMutation,
   useGetUserReviewsQuery,
 } = apiSlice;
