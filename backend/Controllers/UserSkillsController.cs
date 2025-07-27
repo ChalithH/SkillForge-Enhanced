@@ -34,11 +34,16 @@ namespace SkillForge.Api.Controllers
                     Id = us.Id,
                     UserId = us.UserId,
                     SkillId = us.SkillId,
-                    SkillName = us.Skill.Name,
-                    SkillCategory = us.Skill.Category,
                     ProficiencyLevel = us.ProficiencyLevel,
                     IsOffering = us.IsOffering,
-                    Description = us.Description
+                    Description = us.Description,
+                    Skill = new SkillDto
+                    {
+                        Id = us.Skill.Id,
+                        Name = us.Skill.Name,
+                        Category = us.Skill.Category,
+                        Description = us.Skill.Description
+                    }
                 })
                 .ToListAsync();
 
@@ -59,11 +64,16 @@ namespace SkillForge.Api.Controllers
                     Id = us.Id,
                     UserId = us.UserId,
                     SkillId = us.SkillId,
-                    SkillName = us.Skill.Name,
-                    SkillCategory = us.Skill.Category,
                     ProficiencyLevel = us.ProficiencyLevel,
                     IsOffering = us.IsOffering,
-                    Description = us.Description
+                    Description = us.Description,
+                    Skill = new SkillDto
+                    {
+                        Id = us.Skill.Id,
+                        Name = us.Skill.Name,
+                        Category = us.Skill.Category,
+                        Description = us.Skill.Description
+                    }
                 })
                 .FirstOrDefaultAsync();
 
@@ -88,12 +98,14 @@ namespace SkillForge.Api.Controllers
                 return BadRequest("Invalid skill ID");
             }
 
-            // Check if user already has this skill
+            // Check if user already has this skill with the same offering status
             var existingUserSkill = await _context.UserSkills
-                .AnyAsync(us => us.UserId == userId && us.SkillId == createDto.SkillId);
+                .AnyAsync(us => us.UserId == userId && us.SkillId == createDto.SkillId && us.IsOffering == createDto.IsOffering);
             if (existingUserSkill)
             {
-                return BadRequest("You already have this skill");
+                return BadRequest(createDto.IsOffering 
+                    ? "You are already offering this skill" 
+                    : "You are already learning this skill");
             }
 
             // Validate proficiency level
@@ -123,11 +135,16 @@ namespace SkillForge.Api.Controllers
                     Id = us.Id,
                     UserId = us.UserId,
                     SkillId = us.SkillId,
-                    SkillName = us.Skill.Name,
-                    SkillCategory = us.Skill.Category,
                     ProficiencyLevel = us.ProficiencyLevel,
                     IsOffering = us.IsOffering,
-                    Description = us.Description
+                    Description = us.Description,
+                    Skill = new SkillDto
+                    {
+                        Id = us.Skill.Id,
+                        Name = us.Skill.Name,
+                        Category = us.Skill.Category,
+                        Description = us.Skill.Description
+                    }
                 })
                 .FirstAsync();
 
@@ -197,11 +214,16 @@ namespace SkillForge.Api.Controllers
                     Id = us.Id,
                     UserId = us.UserId,
                     SkillId = us.SkillId,
-                    SkillName = us.Skill.Name,
-                    SkillCategory = us.Skill.Category,
                     ProficiencyLevel = us.ProficiencyLevel,
                     IsOffering = us.IsOffering,
-                    Description = us.Description
+                    Description = us.Description,
+                    Skill = new SkillDto
+                    {
+                        Id = us.Skill.Id,
+                        Name = us.Skill.Name,
+                        Category = us.Skill.Category,
+                        Description = us.Skill.Description
+                    }
                 })
                 .ToListAsync();
 
@@ -222,11 +244,16 @@ namespace SkillForge.Api.Controllers
                     Id = us.Id,
                     UserId = us.UserId,
                     SkillId = us.SkillId,
-                    SkillName = us.Skill.Name,
-                    SkillCategory = us.Skill.Category,
                     ProficiencyLevel = us.ProficiencyLevel,
                     IsOffering = us.IsOffering,
-                    Description = us.Description
+                    Description = us.Description,
+                    Skill = new SkillDto
+                    {
+                        Id = us.Skill.Id,
+                        Name = us.Skill.Name,
+                        Category = us.Skill.Category,
+                        Description = us.Skill.Description
+                    }
                 })
                 .ToListAsync();
 
