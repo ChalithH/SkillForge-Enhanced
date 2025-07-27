@@ -67,6 +67,7 @@ namespace SkillForge.Api.Services
                 Name = user.Name,
                 Id = user.Id,
                 TimeCredits = user.TimeCredits,
+                Bio = user.Bio,
                 ProfileImageUrl = user.ProfileImageUrl
             };
         }
@@ -92,6 +93,7 @@ namespace SkillForge.Api.Services
                 Name = user.Name,
                 Id = user.Id,
                 TimeCredits = user.TimeCredits,
+                Bio = user.Bio,
                 ProfileImageUrl = user.ProfileImageUrl
             };
         }

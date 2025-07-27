@@ -86,6 +86,7 @@ const authSlice = createSlice({
           email: action.payload.email,
           name: action.payload.name,
           timeCredits: action.payload.timeCredits,
+          bio: action.payload.bio,
           profileImageUrl: action.payload.profileImageUrl,
         };
         state.token = action.payload.token;
@@ -107,6 +108,7 @@ const authSlice = createSlice({
           email: action.payload.email,
           name: action.payload.name,
           timeCredits: action.payload.timeCredits,
+          bio: action.payload.bio,
           profileImageUrl: action.payload.profileImageUrl,
         };
         state.token = action.payload.token;

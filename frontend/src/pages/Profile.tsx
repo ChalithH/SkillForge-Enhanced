@@ -1,17 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { useUpdateProfileMutation, useUploadProfileImageMutation } from '../store/api/apiSlice';
+import { useUpdateProfileMutation, useUploadProfileImageMutation, useGetUserSkillsQuery } from '../store/api/apiSlice';
 import { updateUserProfile } from '../store/slices/authSlice';
+import { useSkillFilters } from '../hooks/useSkillFilters';
 import Navigation from '../components/Navigation';
 import { useToast } from '../contexts/ToastContext';
 
 export default function Profile() {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const { data: userSkills = [] } = useGetUserSkillsQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
   const [uploadProfileImage, { isLoading: isUploading }] = useUploadProfileImageMutation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { showSuccess, showError } = useToast();
+
+  // Get user skills statistics
+  const { offeredSkillsCount } = useSkillFilters(userSkills);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -323,7 +328,7 @@ export default function Profile() {
                 {/* Profile Stats */}
                 <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">0</div>
+                    <div className="text-2xl font-bold text-gray-900">{offeredSkillsCount}</div>
                     <div className="text-sm text-gray-500">Skills Offered</div>
                   </div>
                   <div className="text-center">

@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
+import MySkills from './pages/MySkills';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AppInitializer } from './components/AppInitializer';
 import { ToastProvider } from './contexts/ToastContext';
@@ -19,6 +20,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/skills" element={<MySkills />} />
             </Route>
           </Routes>
         </AppInitializer>

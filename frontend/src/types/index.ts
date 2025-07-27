@@ -47,3 +47,10 @@ export interface ProfileUpdateData {
   bio?: string;
   profileImageUrl?: string;
 }
+
+export interface CreateUserSkillRequest {
+  skillId: number;
+  proficiencyLevel: number;
+  isOffering: boolean;
+  description?: string;
+}

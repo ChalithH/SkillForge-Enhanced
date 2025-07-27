@@ -7,6 +7,7 @@ interface AuthResponse {
   email: string;
   name: string;
   timeCredits: number;
+  bio?: string;
   profileImageUrl?: string;
 }
 
