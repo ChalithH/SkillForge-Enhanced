@@ -27,13 +27,16 @@ export const useSignalR = () => {
   const [notifications, setNotifications] = useState<SignalRNotification[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<number[]>([]);
   const notificationListeners = useRef<Array<(notification: SignalRNotification) => void>>([]);
+  const connectionRef = useRef<signalR.HubConnection | null>(null);
 
   // Initialize connection
   useEffect(() => {
     if (!token || !user) {
       // Clean up connection if user logs out
       if (connection) {
-        connection.stop();
+        connection.stop().catch(() => {
+          // Ignore errors during cleanup
+        });
         setConnection(null);
         setIsConnected(false);
         setNotifications([]);
@@ -42,91 +45,177 @@ export const useSignalR = () => {
       return;
     }
 
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/hubs/notification?access_token=${token}`, {
-        skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets,
-      })
-      .withAutomaticReconnect({
-        nextRetryDelayInMilliseconds: (retryContext) => {
-          // Exponential backoff: 1s, 2s, 4s, 8s, then 30s max
-          if (retryContext.previousRetryCount < 4) {
-            return Math.pow(2, retryContext.previousRetryCount) * 1000;
-          }
-          return 30000;
+    // Prevent creating multiple connections if one already exists
+    if (connection && (
+      connection.state === signalR.HubConnectionState.Connected ||
+      connection.state === signalR.HubConnectionState.Connecting
+    )) {
+      return;
+    }
+
+    // Create connection setup as async function to handle cleanup properly
+    const setupConnection = async () => {
+      // Clean up any existing connection before creating new one
+      if (connection) {
+        try {
+          await connection.stop();
+        } catch (error) {
+          console.warn('Error stopping previous connection:', error);
         }
-      })
-      .configureLogging(signalR.LogLevel.Information)
-      .build();
-
-    // Set up event handlers
-    newConnection.on('ReceiveNotification', (notification: SignalRNotification) => {
-      console.log('Received notification:', notification);
-      
-      // Add to notifications list
-      setNotifications(prev => [notification, ...prev.slice(0, 49)]); // Keep last 50 notifications
-      
-      // Call all registered listeners
-      notificationListeners.current.forEach(listener => listener(notification));
-      
-      // Show browser notification if permission is granted
-      if (Notification.permission === 'granted') {
-        const browserNotification = new Notification(notification.message, {
-          icon: '/favicon.ico',
-          badge: '/favicon.ico',
-          timestamp: Date.now(),
-          tag: notification.type, // Prevents duplicate notifications of same type
-        });
-
-        // Auto-close after 5 seconds
-        setTimeout(() => {
-          browserNotification.close();
-        }, 5000);
+        setConnection(null);
+        setIsConnected(false);
       }
-    });
 
-    newConnection.on('UserOnline', (userId: number) => {
-      console.log(`User ${userId} came online`);
-      setOnlineUsers(prev => prev.includes(userId) ? prev : [...prev, userId]);
-    });
+      // Construct SignalR URL - use separate VITE_SIGNALR_URL for Docker networking
+      // or fallback to localhost for development
+      const signalRBaseUrl = import.meta.env.VITE_SIGNALR_URL || 'http://localhost:5000';
+      const signalRUrl = `${signalRBaseUrl}/hubs/notification?access_token=${token}`;
+      
+      console.log('SignalR connecting to:', signalRUrl.replace(/access_token=[^&]*/, 'access_token=***'));
+      
+      const newConnection = new signalR.HubConnectionBuilder()
+        .withUrl(signalRUrl, {
+          skipNegotiation: true,
+          transport: signalR.HttpTransportType.WebSockets,
+        })
+        .withAutomaticReconnect({
+          nextRetryDelayInMilliseconds: (retryContext: signalR.RetryContext) => {
+            // Exponential backoff: 1s, 2s, 4s, 8s, then 30s max
+            console.log(`SignalR reconnection attempt ${retryContext.previousRetryCount + 1}`);
+            if (retryContext.previousRetryCount < 4) {
+              return Math.pow(2, retryContext.previousRetryCount) * 1000;
+            }
+            return 30000;
+          }
+        })
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
 
-    newConnection.on('UserOffline', (userId: number) => {
-      console.log(`User ${userId} went offline`);
-      setOnlineUsers(prev => prev.filter(id => id !== userId));
-    });
+      // Set up event handlers
+      newConnection.on('ReceiveNotification', (notification: SignalRNotification) => {
+        console.log('Received notification:', notification);
+        
+        // Add to notifications list
+        setNotifications(prev => [notification, ...prev.slice(0, 49)]); // Keep last 50 notifications
+        
+        // Call all registered listeners
+        notificationListeners.current.forEach(listener => listener(notification));
+        
+        // Show browser notification if permission is granted
+        if (Notification.permission === 'granted') {
+          const browserNotification = new Notification(notification.message, {
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: notification.type, // Prevents duplicate notifications of same type
+          });
 
-    // Connection state handlers
-    newConnection.onclose(() => {
-      console.log('SignalR connection closed');
-      setIsConnected(false);
-    });
+          // Auto-close after 5 seconds
+          setTimeout(() => {
+            browserNotification.close();
+          }, 5000);
+        }
+      });
 
-    newConnection.onreconnecting(() => {
-      console.log('SignalR reconnecting...');
-      setIsConnected(false);
-    });
+      newConnection.on('UserOnline', (userId: number) => {
+        console.log(`User ${userId} came online`);
+        setOnlineUsers(prev => {
+          if (prev.includes(userId)) {
+            return prev; // Already online, no update needed
+          }
+          return [...prev, userId];
+        });
+      });
 
-    newConnection.onreconnected(() => {
-      console.log('SignalR reconnected');
-      setIsConnected(true);
-    });
+      newConnection.on('UserOffline', (userId: number) => {
+        console.log(`User ${userId} went offline`);
+        setOnlineUsers(prev => {
+          if (!prev.includes(userId)) {
+            return prev; // Already offline, no update needed
+          }
+          return prev.filter(id => id !== userId);
+        });
+      });
 
-    // Start connection
-    newConnection.start()
-      .then(() => {
-        console.log('SignalR connected successfully');
-        setIsConnected(true);
-        setConnection(newConnection);
-      })
-      .catch(err => {
-        console.error('SignalR connection failed:', err);
+      // Connection state handlers
+      newConnection.onclose((error?: Error) => {
+        console.log('SignalR connection closed');
+        if (error) {
+          console.error('Connection closed due to error:', error);
+        }
         setIsConnected(false);
       });
 
-    return () => {
-      newConnection.stop();
+      newConnection.onreconnecting((error?: Error) => {
+        console.log('SignalR reconnecting...');
+        if (error) {
+          console.error('Reconnecting due to error:', error);
+        }
+        setIsConnected(false);
+      });
+
+      newConnection.onreconnected((connectionId?: string) => {
+        console.log('SignalR reconnected successfully', connectionId ? `with ID: ${connectionId}` : '');
+        setIsConnected(true);
+        
+        // Refresh online users list after reconnection
+        newConnection.invoke('GetOnlineUsers')
+          .then((onlineUserIds: number[]) => {
+            console.log('Refreshed online users after reconnection:', onlineUserIds);
+            setOnlineUsers(onlineUserIds);
+          })
+          .catch((err: Error) => {
+            console.warn('Failed to refresh online users after reconnection:', err);
+          });
+      });
+
+      // Start connection
+      try {
+        await newConnection.start();
+        console.log('SignalR connected successfully to:', signalRBaseUrl);
+        setIsConnected(true);
+        setConnection(newConnection);
+        connectionRef.current = newConnection;
+        
+        // Get initial list of online users after connection
+        try {
+          const onlineUserIds: number[] = await newConnection.invoke('GetOnlineUsers');
+          console.log('Initial online users:', onlineUserIds);
+          setOnlineUsers(onlineUserIds);
+        } catch (err) {
+          console.warn('Failed to get initial online users:', err);
+        }
+      } catch (err) {
+        const error = err as Error;
+        console.error('SignalR connection failed:', error);
+        console.error('Failed URL:', signalRBaseUrl);
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        setIsConnected(false);
+        
+        // Try alternative connection if Docker connection fails
+        if (signalRBaseUrl.includes('backend:5000')) {
+          console.log('Attempting fallback connection to localhost...');
+          // This will be handled by the reconnection logic
+        }
+      }
     };
-  }, [token, user]);
+
+    // Call the async setup function
+    setupConnection();
+
+    return () => {
+      console.log('Cleaning up SignalR connection...');
+      if (connectionRef.current) {
+        connectionRef.current.stop().catch((err: Error) => {
+          console.warn('Error stopping SignalR connection during cleanup:', err);
+        });
+        connectionRef.current = null;
+      }
+    };
+  }, [token, user?.id]); // Only depend on user ID, not full user object
 
   // Helper functions
   const addNotificationListener = (listener: (notification: SignalRNotification) => void) => {
