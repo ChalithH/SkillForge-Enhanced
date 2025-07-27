@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
-import { Skill, UserSkill, User, ProfileUpdateData, CreateUserSkillRequest, SkillExchange, ExchangeStatus, CreateExchangeRequest } from '../../types';
+import { Skill, UserSkill, User, ProfileUpdateData, CreateUserSkillRequest, SkillExchange, ExchangeStatus, CreateExchangeRequest, UserMatchDto, PagedResult, CompatibilityAnalysisDto, BrowseFilters } from '../../types';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -16,7 +16,7 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Skill', 'UserSkill', 'Exchange', 'Review', 'UserProfile'],
+  tagTypes: ['User', 'Skill', 'UserSkill', 'Exchange', 'Review', 'UserProfile', 'UserMatch'],
   endpoints: (builder) => ({
     // Skills endpoints
     getSkills: builder.query<Skill[], void>({
@@ -243,6 +243,34 @@ export const apiSlice = createApi({
       query: (userId: number) => `/reviews/user/${userId}`,
       providesTags: ['Review'],
     }),
+    
+    // Matching endpoints
+    browseUsers: builder.query<PagedResult<UserMatchDto>, BrowseFilters>({
+      query: (filters) => {
+        const params = new URLSearchParams();
+        
+        if (filters.category) params.append('category', filters.category);
+        if (filters.minRating !== undefined) params.append('minRating', filters.minRating.toString());
+        if (filters.isOnline !== undefined) params.append('isOnline', filters.isOnline.toString());
+        if (filters.skillName) params.append('skillName', filters.skillName);
+        if (filters.page) params.append('page', filters.page.toString());
+        if (filters.limit) params.append('limit', filters.limit.toString());
+        
+        return `/matching/browse?${params.toString()}`;
+      },
+      providesTags: ['UserMatch'],
+      keepUnusedDataFor: 60, // Cache for 1 minute since user data changes frequently
+    }),
+    getRecommendations: builder.query<UserMatchDto[], number | undefined>({
+      query: (limit = 10) => `/matching/recommendations?limit=${limit}`,
+      providesTags: ['UserMatch'],
+      keepUnusedDataFor: 60, // Cache for 1 minute
+    }),
+    getCompatibilityAnalysis: builder.query<CompatibilityAnalysisDto, number>({
+      query: (targetUserId) => `/matching/compatibility/${targetUserId}`,
+      providesTags: ['UserMatch'],
+      keepUnusedDataFor: 300, // Cache for 5 minutes since compatibility doesn't change often
+    }),
   }),
 });
 
@@ -261,4 +289,7 @@ export const {
   useGetCurrentUserQuery,
   useCreateReviewMutation,
   useGetUserReviewsQuery,
+  useBrowseUsersQuery,
+  useGetRecommendationsQuery,
+  useGetCompatibilityAnalysisQuery,
 } = apiSlice;

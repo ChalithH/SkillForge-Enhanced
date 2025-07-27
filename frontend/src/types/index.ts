@@ -105,3 +105,63 @@ export interface CreateExchangeRequest {
   meetingLink?: string;
   notes?: string;
 }
+
+// Matching system types
+export interface UserMatchDto {
+  id: number;
+  name: string;
+  email: string;
+  bio?: string;
+  profileImageUrl?: string;
+  averageRating: number;
+  reviewCount: number;
+  skillsOffered: MatchUserSkillDto[];
+  compatibilityScore: number;
+  isOnline: boolean;
+}
+
+export interface MatchUserSkillDto {
+  id: number;
+  skillId: number;
+  skillName: string;
+  skillCategory: string;
+  proficiencyLevel: number;
+  description?: string;
+}
+
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CompatibilityAnalysisDto {
+  targetUserId: number;
+  targetUserName: string;
+  overallScore: number;
+  targetUserRating: number;
+  sharedSkills: SkillMatchDto[];
+  complementarySkills: SkillMatchDto[];
+  recommendationReason: string;
+}
+
+export interface SkillMatchDto {
+  skillId: number;
+  skillName: string;
+  skillCategory: string;
+  myProficiency: number;
+  theirProficiency: number;
+  myRole: string;
+  theirRole: string;
+}
+
+export interface BrowseFilters {
+  category?: string;
+  minRating?: number;
+  isOnline?: boolean;
+  skillName?: string;
+  page?: number;
+  limit?: number;
+}
