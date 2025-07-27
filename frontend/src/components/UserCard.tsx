@@ -1,6 +1,7 @@
 import React from 'react';
 import { Star, Clock, Users, ChevronRight } from 'lucide-react';
 import { UserMatchDto } from '../types';
+import { useNotifications } from '../contexts/NotificationContext';
 
 interface UserCardProps {
   user: UserMatchDto;
@@ -15,6 +16,7 @@ export const UserCard: React.FC<UserCardProps> = ({
   onRequestExchange,
   showCompatibilityScore = true,
 }) => {
+  const { isUserOnline } = useNotifications();
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
@@ -53,8 +55,8 @@ export const UserCard: React.FC<UserCardProps> = ({
     return 'text-gray-600 bg-gray-100';
   };
 
-  const getOnlineStatusColor = (isOnline: boolean) => {
-    return isOnline ? 'bg-green-400' : 'bg-gray-300';
+  const getOnlineStatusColor = (userId: number) => {
+    return isUserOnline(userId) ? 'bg-green-400' : 'bg-gray-300';
   };
 
   return (
@@ -69,8 +71,8 @@ export const UserCard: React.FC<UserCardProps> = ({
               className="w-16 h-16 rounded-full object-cover"
             />
             <div 
-              className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${getOnlineStatusColor(user.isOnline)}`}
-              title={user.isOnline ? 'Online' : 'Offline'}
+              className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${getOnlineStatusColor(user.id)}`}
+              title={isUserOnline(user.id) ? 'Online' : 'Offline'}
             />
           </div>
           <div className="flex-1">

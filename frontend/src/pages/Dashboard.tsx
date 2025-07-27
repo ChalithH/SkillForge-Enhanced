@@ -5,6 +5,7 @@ import { useSkillFilters } from '../hooks/useSkillFilters';
 import Navigation from '../components/Navigation';
 import SkillCard from '../components/SkillCard';
 import AddSkillModal from '../components/AddSkillModal';
+import { ActivityFeed } from '../components/ActivityFeed';
 import { useToast } from '../contexts/ToastContext';
 import { UserSkill, CreateUserSkillRequest } from '../types';
 
@@ -120,17 +121,19 @@ export default function Dashboard() {
               </div>
             </div>
             
-            {/* Skills Preview Section */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Your Skills Preview</h3>
-                <button
-                  onClick={() => setIsAddSkillModalOpen(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                >
-                  + Add Skill
-                </button>
-              </div>
+            {/* Main Content Grid */}
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Skills Preview Section */}
+              <div className="lg:col-span-2">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium text-gray-900">Your Skills Preview</h3>
+                  <button
+                    onClick={() => setIsAddSkillModalOpen(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                  >
+                    + Add Skill
+                  </button>
+                </div>
               
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
@@ -167,16 +170,22 @@ export default function Dashboard() {
                 </div>
               )}
               
-              {previewSkills.length > 0 && (
-                <div className="mt-4 text-center">
-                  <a
-                    href="/skills"
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                  >
-                    View all skills ({totalValidSkillsCount}) →
-                  </a>
-                </div>
-              )}
+                {previewSkills.length > 0 && (
+                  <div className="mt-4 text-center">
+                    <a
+                      href="/skills"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      View all skills ({totalValidSkillsCount}) →
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Activity Feed Section */}
+              <div className="lg:col-span-1">
+                <ActivityFeed />
+              </div>
             </div>
           </div>
         </div>

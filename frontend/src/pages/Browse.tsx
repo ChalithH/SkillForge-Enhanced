@@ -4,11 +4,13 @@ import { UserCard } from '../components/UserCard';
 import { ExchangeRequestModal } from '../components/ExchangeRequestModal';
 import { useBrowseUsersQuery, useGetRecommendationsQuery, useGetSkillCategoriesQuery } from '../store/api/apiSlice';
 import { useAppSelector } from '../store/hooks';
+import { useNotifications } from '../contexts/NotificationContext';
 import { UserMatchDto, BrowseFilters } from '../types';
 import { Search, Filter, Users, TrendingUp, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function Browse() {
   const { user } = useAppSelector((state) => state.auth);
+  const { isUserOnline } = useNotifications();
   const [filters, setFilters] = useState<BrowseFilters>({
     page: 1,
     limit: 12,
