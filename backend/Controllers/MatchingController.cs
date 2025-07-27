@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SkillForge.Api.Data;
 using SkillForge.Api.Models;
 using SkillForge.Api.DTOs;
+using SkillForge.Api.Services;
 using System.Security.Claims;
 
 namespace SkillForge.Api.Controllers
@@ -14,10 +15,12 @@ namespace SkillForge.Api.Controllers
     public class MatchingController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IUserPresenceService _userPresenceService;
 
-        public MatchingController(ApplicationDbContext context)
+        public MatchingController(ApplicationDbContext context, IUserPresenceService userPresenceService)
         {
             _context = context;
+            _userPresenceService = userPresenceService;
         }
 
         [HttpGet("browse")]
@@ -60,31 +63,36 @@ namespace SkillForge.Api.Controllers
                 .Take(limit)
                 .ToListAsync();
 
-            var userMatches = users.Select(u => new UserMatchDto
+            var userMatches = new List<UserMatchDto>();
+            foreach (var u in users)
             {
-                Id = u.Id,
-                Name = u.Name,
-                Email = u.Email,
-                Bio = u.Bio,
-                ProfileImageUrl = u.ProfileImageUrl,
-                AverageRating = u.ReviewsReceived.Any() 
-                    ? Math.Round(u.ReviewsReceived.Average(r => r.Rating), 1) 
-                    : 0,
-                ReviewCount = u.ReviewsReceived.Count,
-                SkillsOffered = u.UserSkills
-                    .Where(us => us.IsOffering)
-                    .Select(us => new MatchUserSkillDto
-                    {
-                        Id = us.Id,
-                        SkillId = us.SkillId,
-                        SkillName = us.Skill!.Name,
-                        SkillCategory = us.Skill.Category,
-                        ProficiencyLevel = us.ProficiencyLevel,
-                        Description = us.Description
-                    }).ToList(),
-                CompatibilityScore = CalculateCompatibilityScore(currentUserId, u.Id),
-                IsOnline = false // TODO: Implement with SignalR in afternoon tasks
-            }).ToList();
+                var userMatch = new UserMatchDto
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Bio = u.Bio,
+                    ProfileImageUrl = u.ProfileImageUrl,
+                    AverageRating = u.ReviewsReceived.Any() 
+                        ? Math.Round(u.ReviewsReceived.Average(r => r.Rating), 1) 
+                        : 0,
+                    ReviewCount = u.ReviewsReceived.Count,
+                    SkillsOffered = u.UserSkills
+                        .Where(us => us.IsOffering)
+                        .Select(us => new MatchUserSkillDto
+                        {
+                            Id = us.Id,
+                            SkillId = us.SkillId,
+                            SkillName = us.Skill!.Name,
+                            SkillCategory = us.Skill.Category,
+                            ProficiencyLevel = us.ProficiencyLevel,
+                            Description = us.Description
+                        }).ToList(),
+                    CompatibilityScore = CalculateCompatibilityScore(currentUserId, u.Id),
+                    IsOnline = await _userPresenceService.IsUserOnlineAsync(u.Id)
+                };
+                userMatches.Add(userMatch);
+            }
 
             // Apply rating filter after DTO mapping
             if (minRating.HasValue)
@@ -142,7 +150,12 @@ namespace SkillForge.Api.Controllers
                     .Take(limit)
                     .ToListAsync();
 
-                return Ok(topRatedUsers.Select(u => CreateUserMatchDto(u, currentUserId)).ToList());
+                var topRatedUserMatches = new List<UserMatchDto>();
+                foreach (var user in topRatedUsers)
+                {
+                    topRatedUserMatches.Add(await CreateUserMatchDtoAsync(user, currentUserId));
+                }
+                return Ok(topRatedUserMatches);
             }
 
             // Find users who offer skills that the current user wants
@@ -155,14 +168,19 @@ namespace SkillForge.Api.Controllers
                     us.IsOffering && currentUserWantedSkills.Contains(us.SkillId)))
                 .ToListAsync();
 
-            var userMatches = recommendedUsers
-                .Select(u => CreateUserMatchDto(u, currentUserId))
+            var userMatches = new List<UserMatchDto>();
+            foreach (var user in recommendedUsers)
+            {
+                userMatches.Add(await CreateUserMatchDtoAsync(user, currentUserId));
+            }
+
+            var sortedMatches = userMatches
                 .OrderByDescending(u => u.CompatibilityScore)
                 .ThenByDescending(u => u.AverageRating)
                 .Take(limit)
                 .ToList();
 
-            return Ok(userMatches);
+            return Ok(sortedMatches);
         }
 
         [HttpGet("compatibility/{targetUserId}")]
@@ -260,7 +278,7 @@ namespace SkillForge.Api.Controllers
             return Math.Min(score, 100); // Cap at 100
         }
 
-        private UserMatchDto CreateUserMatchDto(User user, int currentUserId)
+        private async Task<UserMatchDto> CreateUserMatchDtoAsync(User user, int currentUserId)
         {
             return new UserMatchDto
             {
@@ -285,7 +303,7 @@ namespace SkillForge.Api.Controllers
                         Description = us.Description
                     }).ToList(),
                 CompatibilityScore = CalculateCompatibilityScore(currentUserId, user.Id),
-                IsOnline = false // TODO: Implement with SignalR
+                IsOnline = await _userPresenceService.IsUserOnlineAsync(user.Id)
             };
         }
 
