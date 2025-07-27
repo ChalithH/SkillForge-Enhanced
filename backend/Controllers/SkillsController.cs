@@ -69,21 +69,5 @@ namespace SkillForge.Api.Controllers
             return skills;
         }
 
-        // GET: api/skills/search?q={query}
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<Skill>>> SearchSkills([FromQuery] string q)
-        {
-            if (string.IsNullOrWhiteSpace(q))
-            {
-                return BadRequest("Search query cannot be empty");
-            }
-
-            var skills = await _context.Skills
-                .Where(s => s.Name.Contains(q) || s.Description.Contains(q))
-                .OrderBy(s => s.Name)
-                .ToListAsync();
-
-            return skills;
-        }
     }
 }

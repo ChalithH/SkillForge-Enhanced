@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
-import { Skill, UserSkill, User, ProfileUpdateData } from '../../types';
+import { Skill, UserSkill, User, ProfileUpdateData, CreateUserSkillRequest } from '../../types';
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -16,20 +16,20 @@ const baseQuery = fetchBaseQuery({
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Skill', 'UserSkill', 'Exchange', 'Review'],
+  tagTypes: ['User', 'Skill', 'UserSkill', 'Exchange', 'Review', 'UserProfile'],
   endpoints: (builder) => ({
     // Skills endpoints
     getSkills: builder.query<Skill[], void>({
       query: () => '/skills',
       providesTags: ['Skill'],
+      // Cache skills for 5 minutes since they're relatively static
+      keepUnusedDataFor: 300,
     }),
     getSkillCategories: builder.query<string[], void>({
       query: () => '/skills/categories',
       providesTags: ['Skill'],
-    }),
-    searchSkills: builder.query<Skill[], string>({
-      query: (query: string) => `/skills/search?query=${query}`,
-      providesTags: ['Skill'],
+      // Cache categories for 10 minutes since they change even less frequently
+      keepUnusedDataFor: 600,
     }),
     
     // User Skills endpoints
@@ -37,24 +37,40 @@ export const apiSlice = createApi({
       query: () => '/userskills',
       providesTags: ['UserSkill'],
     }),
-    addUserSkill: builder.mutation<UserSkill, Omit<UserSkill, 'id'>>({
+    addUserSkill: builder.mutation<UserSkill, CreateUserSkillRequest>({
       query: (skillData) => ({
         url: '/userskills',
         method: 'POST',
         body: skillData,
       }),
       invalidatesTags: ['UserSkill'],
-      onQueryStarted: async (skillData, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (skillData, { dispatch, queryFulfilled, getState }) => {
         // Optimistic update
+        const state = getState() as any;
+        const userId = state.auth.user?.id;
+        
+        // Look up the skill data from the skills cache
+        const skillsData = apiSlice.endpoints.getSkills.select()(state)?.data;
+        const skill = skillsData?.find(s => s.id === skillData.skillId);
+        
         const patchResult = dispatch(
           apiSlice.util.updateQueryData('getUserSkills', undefined, (draft) => {
-            draft.push({ ...skillData, id: Date.now() }); // Temporary ID
+            draft.push({ 
+              ...skillData, 
+              id: Date.now(), // Temporary ID
+              userId: userId || 0, // Use current user ID
+              skill: skill // Include the actual skill data if available
+            });
           })
         );
         try {
           await queryFulfilled;
-        } catch {
+        } catch (error) {
+          // Revert optimistic update on error
           patchResult.undo();
+          
+          // Log error for debugging
+          console.error('Failed to add user skill:', error);
         }
       },
     }),
@@ -77,8 +93,12 @@ export const apiSlice = createApi({
         );
         try {
           await queryFulfilled;
-        } catch {
+        } catch (error) {
+          // Revert optimistic update on error
           patchResult.undo();
+          
+          // Log error for debugging
+          console.error('Failed to update user skill:', error);
         }
       },
     }),
@@ -89,7 +109,7 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['UserSkill'],
       onQueryStarted: async (id, { dispatch, queryFulfilled }) => {
-        // Optimistic update
+        // Optimistic update - immediately remove from UI
         const patchResult = dispatch(
           apiSlice.util.updateQueryData('getUserSkills', undefined, (draft) => {
             return draft.filter((skill) => skill.id !== id);
@@ -97,8 +117,12 @@ export const apiSlice = createApi({
         );
         try {
           await queryFulfilled;
-        } catch {
+        } catch (error) {
+          // Revert optimistic update on error
           patchResult.undo();
+          
+          // Log error for debugging
+          console.error('Failed to delete user skill:', error);
         }
       },
     }),
@@ -110,7 +134,37 @@ export const apiSlice = createApi({
         method: 'PUT',
         body: profileData,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User', 'UserProfile'],
+      onQueryStarted: async (profileData, { dispatch, queryFulfilled, getState }) => {
+        // Optimistic update for auth state
+        const state = getState() as any;
+        const currentUser = state.auth.user;
+        
+        if (currentUser) {
+          dispatch({
+            type: 'auth/updateUserProfile',
+            payload: profileData
+          });
+          
+          try {
+            const { data: updatedUser } = await queryFulfilled;
+            // Update with actual response data
+            dispatch({
+              type: 'auth/updateUserProfile',
+              payload: updatedUser
+            });
+          } catch (error) {
+            // Revert optimistic update on error
+            dispatch({
+              type: 'auth/updateUserProfile',
+              payload: currentUser
+            });
+            
+            // Log error for debugging
+            console.error('Failed to update user profile:', error);
+          }
+        }
+      },
     }),
     uploadProfileImage: builder.mutation<{imageUrl: string}, FormData>({
       query: (formData) => ({
@@ -118,7 +172,7 @@ export const apiSlice = createApi({
         method: 'POST',
         body: formData,
       }),
-      invalidatesTags: ['User'],
+      invalidatesTags: ['User', 'UserProfile'],
     }),
     
     // Exchange endpoints
@@ -162,7 +216,6 @@ export const apiSlice = createApi({
 export const {
   useGetSkillsQuery,
   useGetSkillCategoriesQuery,
-  useSearchSkillsQuery,
   useGetUserSkillsQuery,
   useAddUserSkillMutation,
   useUpdateUserSkillMutation,
