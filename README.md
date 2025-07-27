@@ -64,7 +64,7 @@ The platform goes beyond simple social networking by creating economic incentive
 
 ## Demo Video
 
-**[SkillForge Demo Video - 5 minutes](https://www.youtube.com/watch?v=7qwzlWVy1w4)**
+**[SkillForge Demo Video](https://www.youtube.com/watch?v=7qwzlWVy1w4)**
 
 ### Video Content Overview
 - Project introduction and networking theme relevance
