@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SkillForge.Api.Data;
 using SkillForge.Api.DTOs.Exchange;
 using SkillForge.Api.Models;
 using SkillForge.Api.Services;
@@ -13,11 +15,15 @@ namespace SkillForge.Api.Controllers
     public class ExchangesController : ControllerBase
     {
         private readonly IExchangeService _exchangeService;
+        private readonly INotificationService _notificationService;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<ExchangesController> _logger;
 
-        public ExchangesController(IExchangeService exchangeService, ILogger<ExchangesController> logger)
+        public ExchangesController(IExchangeService exchangeService, INotificationService notificationService, ApplicationDbContext context, ILogger<ExchangesController> logger)
         {
             _exchangeService = exchangeService;
+            _notificationService = notificationService;
+            _context = context;
             _logger = logger;
         }
 
@@ -36,6 +42,13 @@ namespace SkillForge.Api.Controllers
                 if (exchange == null)
                 {
                     return BadRequest(new { message = "Failed to create exchange. Please check that the offerer exists and offers this skill." });
+                }
+
+                // Send real-time notification to the offerer
+                var fullExchange = await GetFullExchangeModelAsync(exchange.Id);
+                if (fullExchange != null)
+                {
+                    await _notificationService.SendExchangeRequestNotificationAsync(fullExchange);
                 }
 
                 _logger.LogInformation($"User {userId} created exchange request with user {dto.OffererId} for skill {dto.SkillId}");
@@ -146,6 +159,13 @@ namespace SkillForge.Api.Controllers
                     return NotFound();
                 }
 
+                // Send real-time notification about acceptance
+                var fullExchange = await GetFullExchangeModelAsync(exchange.Id);
+                if (fullExchange != null)
+                {
+                    await _notificationService.SendExchangeStatusUpdateNotificationAsync(fullExchange, ExchangeStatus.Pending);
+                }
+
                 _logger.LogInformation($"Exchange {id} accepted by user {userId}");
                 return Ok(exchange);
             }
@@ -175,6 +195,13 @@ namespace SkillForge.Api.Controllers
                 if (exchange == null)
                 {
                     return NotFound();
+                }
+
+                // Send real-time notification about rejection
+                var fullExchange = await GetFullExchangeModelAsync(exchange.Id);
+                if (fullExchange != null)
+                {
+                    await _notificationService.SendExchangeStatusUpdateNotificationAsync(fullExchange, ExchangeStatus.Pending);
                 }
 
                 _logger.LogInformation($"Exchange {id} rejected by user {userId}");
@@ -208,6 +235,13 @@ namespace SkillForge.Api.Controllers
                     return NotFound();
                 }
 
+                // Send real-time notification about cancellation
+                var fullExchange = await GetFullExchangeModelAsync(exchange.Id);
+                if (fullExchange != null)
+                {
+                    await _notificationService.SendExchangeStatusUpdateNotificationAsync(fullExchange, ExchangeStatus.Accepted);
+                }
+
                 _logger.LogInformation($"Exchange {id} cancelled by user {userId}");
                 return Ok(exchange);
             }
@@ -237,6 +271,13 @@ namespace SkillForge.Api.Controllers
                 if (exchange == null)
                 {
                     return NotFound();
+                }
+
+                // Send real-time notification about completion
+                var fullExchange = await GetFullExchangeModelAsync(exchange.Id);
+                if (fullExchange != null)
+                {
+                    await _notificationService.SendExchangeStatusUpdateNotificationAsync(fullExchange, ExchangeStatus.Accepted);
                 }
 
                 _logger.LogInformation($"Exchange {id} completed by user {userId}");
@@ -292,6 +333,15 @@ namespace SkillForge.Api.Controllers
                 return null;
             }
             return userId;
+        }
+
+        private async Task<SkillExchange?> GetFullExchangeModelAsync(int exchangeId)
+        {
+            return await _context.SkillExchanges
+                .Include(e => e.Offerer)
+                .Include(e => e.Learner)
+                .Include(e => e.Skill)
+                .FirstOrDefaultAsync(e => e.Id == exchangeId);
         }
     }
 }
