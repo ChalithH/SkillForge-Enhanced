@@ -218,7 +218,7 @@ namespace SkillForge.Api.Services
                 }
 
                 // If exchange was accepted and we're within 24 hours of the scheduled time,
-                // we might want to implement a penalty system in the future
+                // maybe to implement a penalty system in the future
                 var hoursUntilExchange = (exchange.ScheduledAt - DateTime.UtcNow).TotalHours;
                 if (exchange.Status == ExchangeStatus.Accepted && hoursUntilExchange < 24 && hoursUntilExchange > 0)
                 {
