@@ -99,9 +99,24 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false,
         ClockSkew = TimeSpan.Zero
     };
+    
+    // Enable JWT authentication for SignalR
+    x.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
-// Configure CORS
+// Configure CORS for SignalR support
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
@@ -109,7 +124,8 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:3000")
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials());
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true)); // Allow SignalR connections
 });
 
 // Configure SignalR
@@ -125,6 +141,10 @@ builder.Services.AddScoped<ISkillService, SkillService>();
 builder.Services.AddScoped<ICreditService, CreditService>();
 builder.Services.AddScoped<IExchangeService, ExchangeService>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
+
+// Register singleton services for real-time features
+builder.Services.AddSingleton<IUserPresenceService, UserPresenceService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 // Configure background service options
 builder.Services.Configure<ExchangeBackgroundServiceOptions>(
