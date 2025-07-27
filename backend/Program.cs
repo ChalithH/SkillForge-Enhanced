@@ -70,8 +70,17 @@ if (string.IsNullOrEmpty(connectionString))
     throw new InvalidOperationException("Connection string 'DefaultConnection' not found. Please set the ConnectionStrings__DefaultConnection environment variable.");
 }
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// Use SQLite for production deployment (Azure SQL auth issues)
+if (connectionString.Contains("Data Source="))
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString));
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(connectionString));
+}
 
 // Configure JWT Authentication with secret from environment variables
 var jwtSecretKey = builder.Configuration["JwtSettings:SecretKey"];
@@ -124,17 +133,19 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:3000",      // Local development
                 "http://frontend:3000",       // Docker container
-                "http://127.0.0.1:3000"       // Alternative localhost
+                "http://127.0.0.1:3000",      // Alternative localhost
+                "http://skillforge-frontend.australiaeast.azurecontainer.io"  // Azure production
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
             .SetIsOriginAllowed(origin =>
             {
-                // Allow any localhost or frontend container origins for development
+                // Allow any localhost, frontend container, or Azure origins
                 return origin?.StartsWith("http://localhost") == true ||
                        origin?.StartsWith("http://127.0.0.1") == true ||
-                       origin?.StartsWith("http://frontend") == true;
+                       origin?.StartsWith("http://frontend") == true ||
+                       origin?.StartsWith("http://skillforge-frontend.australiaeast.azurecontainer.io") == true;
             })); // Dynamic origin validation for SignalR
 });
 
@@ -199,15 +210,26 @@ app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notification");
 app.MapHealthChecks("/health");
 
-// Apply migrations on startup in development
-if (app.Environment.IsDevelopment())
+// Apply migrations on startup for all environments
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+try 
 {
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    Console.WriteLine("Starting database migrations...");
     dbContext.Database.Migrate();
+    Console.WriteLine("Database migrations completed successfully.");
     
     // Seed the database
     DbInitializer.Initialize(dbContext);
+    Console.WriteLine("Database seeding completed.");
+}
+catch (Exception ex)
+{
+    // Log but don't crash the app - important for production resilience
+    Console.WriteLine($"Database migration failed: {ex.Message}");
+    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    // Continue running - health endpoint will still work
 }
 
 app.Run();

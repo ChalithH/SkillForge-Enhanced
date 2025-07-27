@@ -1,5 +1,50 @@
-.nuget/
-packages/
+# .dockerignore for .NET backend - optimized for layer caching
+
+# Build outputs
 bin/
 obj/
+out/
+
+# NuGet packages
+.nuget/
+packages/
+*.nupkg
+
+# Development files
+.vs/
 .vscode/
+*.user
+*.suo
+*.cache
+*.log
+
+# Runtime files that shouldn't be in source
+*.dll
+*.exe
+*.pdb
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Environment files
+.env*
+
+# Upload directory (created at runtime)
+uploads/
+
+# Test files
+**/TestResults/
+**/*.trx

@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SkillForge.Api.Data;
 
 namespace SkillForge.Api.Controllers
 {
@@ -6,15 +8,36 @@ namespace SkillForge.Api.Controllers
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<object> Get()
+        private readonly ApplicationDbContext _context;
+
+        public HealthController(ApplicationDbContext context)
         {
-            return Ok(new 
-            { 
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<object>> Get()
+        {
+            var result = new 
+            {
                 status = "healthy",
-                service = "SkillForge API",
-                timestamp = DateTime.UtcNow
-            });
+                service = "SkillForge API", 
+                timestamp = DateTime.UtcNow,
+                database = "unknown"  // Default value
+            };
+
+            try 
+            {
+                await _context.Database.CanConnectAsync();
+                result = new { result.status, result.service, result.timestamp, database = "connected" };
+            }
+            catch (Exception ex)
+            {
+                // Keep default "unknown" value for database
+                result = new { result.status, result.service, result.timestamp, database = "disconnected" };
+            }
+
+            return Ok(result);
         }
     }
 }
