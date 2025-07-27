@@ -138,6 +138,23 @@ namespace SkillForge.Api.Data
             modelBuilder.Entity<CreditTransaction>()
                 .HasIndex(ct => new { ct.UserId, ct.CreatedAt })
                 .HasDatabaseName("IX_CreditTransaction_UserId_CreatedAt");
+            
+            // Optimize matching queries with indexes
+            modelBuilder.Entity<UserSkill>()
+                .HasIndex(us => new { us.IsOffering, us.SkillId })
+                .HasDatabaseName("IX_UserSkill_IsOffering_SkillId");
+            
+            modelBuilder.Entity<UserSkill>()
+                .HasIndex(us => new { us.UserId, us.IsOffering })
+                .HasDatabaseName("IX_UserSkill_UserId_IsOffering");
+            
+            modelBuilder.Entity<Skill>()
+                .HasIndex(s => s.Category)
+                .HasDatabaseName("IX_Skill_Category");
+            
+            modelBuilder.Entity<Review>()
+                .HasIndex(r => r.ReviewedUserId)
+                .HasDatabaseName("IX_Review_ReviewedUserId");
         }
     }
 }
