@@ -84,7 +84,6 @@ The platform goes beyond simple social networking by creating economic incentive
 - **SignalR implementation** for live user interactions
 - **Real-time notifications** for exchange requests and updates
 - **Live online/offline status** indicators
-- **Instant messaging** capabilities between users
 
 ### 3. Advanced State Management (Redux)
 - **Redux Toolkit** for predictable state management
