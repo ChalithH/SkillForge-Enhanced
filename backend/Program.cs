@@ -121,15 +121,32 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp",
         builder => builder
-            .WithOrigins("http://localhost:3000")
+            .WithOrigins(
+                "http://localhost:3000",      // Local development
+                "http://frontend:3000",       // Docker container
+                "http://127.0.0.1:3000"       // Alternative localhost
+            )
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
-            .SetIsOriginAllowed(_ => true)); // Allow SignalR connections
+            .SetIsOriginAllowed(origin =>
+            {
+                // Allow any localhost or frontend container origins for development
+                return origin?.StartsWith("http://localhost") == true ||
+                       origin?.StartsWith("http://127.0.0.1") == true ||
+                       origin?.StartsWith("http://frontend") == true;
+            })); // Dynamic origin validation for SignalR
 });
 
-// Configure SignalR
-builder.Services.AddSignalR();
+// Configure SignalR with security settings
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+});
+
+// Configure SignalR logging to exclude sensitive data
+builder.Logging.AddFilter("Microsoft.AspNetCore.SignalR", LogLevel.Warning);
+builder.Logging.AddFilter("Microsoft.AspNetCore.Http.Connections", LogLevel.Warning);
 
 // Configure AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
