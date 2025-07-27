@@ -9,25 +9,28 @@ import Browse from './pages/Browse';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AppInitializer } from './components/AppInitializer';
 import { ToastProvider } from './contexts/ToastContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 function App() {
   return (
     <BrowserRouter>
       <ToastProvider>
-        <AppInitializer>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/skills" element={<MySkills />} />
-              <Route path="/exchanges" element={<MyExchanges />} />
-              <Route path="/browse" element={<Browse />} />
-            </Route>
-          </Routes>
-        </AppInitializer>
+        <NotificationProvider>
+          <AppInitializer>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/skills" element={<MySkills />} />
+                <Route path="/exchanges" element={<MyExchanges />} />
+                <Route path="/browse" element={<Browse />} />
+              </Route>
+            </Routes>
+          </AppInitializer>
+        </NotificationProvider>
       </ToastProvider>
     </BrowserRouter>
   );
