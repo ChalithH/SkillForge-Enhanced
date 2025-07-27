@@ -54,3 +54,54 @@ export interface CreateUserSkillRequest {
   isOffering: boolean;
   description?: string;
 }
+
+export enum ExchangeStatus {
+  Pending = 0,
+  Accepted = 1,
+  Rejected = 2,
+  Cancelled = 3,
+  Completed = 4,
+  NoShow = 5
+}
+
+export interface SkillExchange {
+  id: number;
+  offererId: number;
+  offerer?: User;
+  learnerId: number;
+  learner?: User;
+  skillId: number;
+  skill?: Skill;
+  scheduledAt: string;
+  duration: number;
+  status: ExchangeStatus;
+  meetingLink?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  reviews: Review[];
+}
+
+export interface Review {
+  id: number;
+  exchangeId: number;
+  exchange?: SkillExchange;
+  reviewerId: number;
+  reviewer?: User;
+  reviewedUserId: number;
+  reviewedUser?: User;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateExchangeRequest {
+  offererId: number;
+  learnerId: number;
+  skillId: number;
+  scheduledAt: string;
+  duration: number;
+  meetingLink?: string;
+  notes?: string;
+}
