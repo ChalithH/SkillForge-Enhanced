@@ -42,9 +42,10 @@ export default function Navigation() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', current: location.pathname === '/dashboard' },
-    { name: 'Profile', href: '/profile', current: location.pathname === '/profile' },
+    { name: 'Browse', href: '/browse', current: location.pathname === '/browse' },
     { name: 'My Skills', href: '/skills', current: location.pathname === '/skills' },
     { name: 'My Exchanges', href: '/exchanges', current: location.pathname === '/exchanges' },
+    { name: 'Profile', href: '/profile', current: location.pathname === '/profile' },
   ];
 
   return (
