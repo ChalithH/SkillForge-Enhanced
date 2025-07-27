@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SkillForge.Api.Configuration;
 using SkillForge.Api.Data;
+using SkillForge.Api.HealthChecks;
 using SkillForge.Api.Services;
 using SkillForge.Api.Hubs;
 using System.Text;
@@ -12,6 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck<ExchangeBackgroundServiceHealthCheck>("exchange_background_service");
 
 // Configure request size limits for file uploads
 builder.Services.Configure<FormOptions>(options =>
@@ -116,8 +122,16 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ISkillService, SkillService>();
+builder.Services.AddScoped<ICreditService, CreditService>();
 builder.Services.AddScoped<IExchangeService, ExchangeService>();
 builder.Services.AddScoped<IMatchingService, MatchingService>();
+
+// Configure background service options
+builder.Services.Configure<ExchangeBackgroundServiceOptions>(
+    builder.Configuration.GetSection(ExchangeBackgroundServiceOptions.SectionName));
+
+// Register background services
+builder.Services.AddHostedService<ExchangeBackgroundService>();
 
 // Build the application
 var app = builder.Build();
@@ -146,6 +160,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notification");
+app.MapHealthChecks("/health");
 
 // Apply migrations on startup in development
 if (app.Environment.IsDevelopment())
