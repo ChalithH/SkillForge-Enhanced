@@ -1,199 +1,167 @@
-# SkillForge - Professional Skill Exchange Platform
+# SkillForge - Skill Exchange Platform
 
-A full-stack skill exchange platform where professionals earn time credits by teaching skills and spend them to learn from others. Successfully deployed to Microsoft Azure with complete Docker containerization.
+> Continued development of a skill exchange platform (original: July 2025)
+> 
+> **Initial Implementation**: [SkillForge-Original](https://github.com/ChalithH/SkillForge)
 
-## Theme Relevance: Networking
+## About
 
-SkillForge directly embodies the "Networking" theme by creating meaningful professional connections through skill sharing. The platform facilitates networking in multiple ways:
+SkillForge is an ongoing project exploring skill exchange through a time-credit economy. I've continued developing and refining the platform since the initial implementation, focusing on user experience and code quality improvements.
 
-- **Professional Skill Networks**: Users connect based on complementary skills, creating learning partnerships
-- **Time Credit Economy**: Encourages active participation and mutual value exchange within the network
-- **Real-time Communication**: SignalR enables instant networking through live notifications and status updates
-- **Community Building**: Users build reputations and relationships through the review and rating system
-- **Knowledge Sharing Network**: Transforms individual expertise into collective community learning
+### Recent Improvements
 
-The platform goes beyond simple social networking by creating economic incentives for knowledge sharing, making professional networking both meaningful and mutually beneficial.
+- **User Interface**: Cleaned up non-functional elements and improved navigation flow
+- **Development Setup**: Added environment configuration templates for easier local development
+- **Code Quality**: Enhanced error handling and optimised user workflows
+- **Developer Experience**: Streamlined setup process with better configuration management
 
-## Unique Features & Technical Highlights
+## Project Overview
 
-### Production-Grade Cloud Architecture
-- **Complete Azure deployment** with Container Instances, Container Registry, and SQL Database
-- **Multi-stage Docker builds** for optimized production containers
-- **Automated database migrations** in cloud environment
-- **Professional nginx configuration** with security headers and caching
+SkillForge enables users to teach and learn skills through a time-credit economy. Users earn credits by teaching skills and spend them to learn from others, creating a balanced ecosystem of knowledge exchange.
 
-### Advanced Real-time Networking
-- **SignalR WebSocket implementation** for instant communication
-- **Live online/offline status** indicators creating dynamic networking presence
-- **Real-time notifications** for skill exchange requests and updates
-- **Instant feedback loops** encouraging active community participation
+### Core Features
 
-### Intelligent Time Credit Economy
-- **Balanced learning ecosystem** where teaching earns credits to spend on learning
-- **Prevents one-sided consumption** ensuring mutual value exchange
-- **Gamified skill sharing** with credit tracking and transaction history
-- **Economic incentives** for quality teaching and active participation
+The platform connects people based on complementary skills and learning interests:
 
-## Live Deployment
-- **Frontend**: http://skillforge-frontend.australiaeast.azurecontainer.io
-- **Backend API**: http://skillforge-backend.australiaeast.azurecontainer.io:5000
-- **Health Check**: http://skillforge-backend.australiaeast.azurecontainer.io:5000/api/health
+- **Intelligent Skill Matching**: Advanced compatibility algorithms analyse user skills, learning preferences, and proficiency levels
+- **Real-time User Presence**: Live status indicators and user activity tracking via SignalR WebSockets
+- **Credit-based Economy Framework**: Creates sustainable relationships through balanced give-and-take (1 hour teaching = 1 hour learning)
+- **Skill Exchange Requests**: Users can request exchanges with comprehensive skill and user matching
+- **Community Building**: User profiles, activity tracking, and skill discovery system
 
-## Architecture
+## Technology Stack
 
 ### Frontend
-- **React 18** with TypeScript for type safety
-- **Tailwind CSS** for responsive design
-- **Redux Toolkit** for state management
-- **Axios** for API communication
-- **React Router** for navigation
+- **React 18** with **TypeScript**
+- **Redux Toolkit** + RTK Query for predictable state management
+- **React Router** for client-side navigation
+- **Tailwind CSS** for responsive styling
+- **SignalR** for real-time WebSocket features
+- **Vite** for modern build tooling and fast development
 
 ### Backend
-- **.NET 8 Web API** with Entity Framework Core
-- **JWT Authentication** with refresh tokens
-- **Azure SQL Database** with automated migrations
-- **SignalR** for real-time features
-- **Health monitoring** endpoints
+- **.NET 8** Web API
+- **Entity Framework Core** with comprehensive data modeling
+- **SQL Server** database with optimised schema design
+- **JWT Authentication** for secure user management
+- **SignalR** for real-time presence and activity tracking
+- **RESTful API design** with comprehensive CRUD operations
 
 ### Infrastructure
-- **Azure Container Instances** for scalable deployment
-- **Azure Container Registry** for image management
-- **Azure SQL Database** for data persistence
-- **Docker multi-stage builds** for optimized containers
-- **nginx** reverse proxy for frontend
+- **Docker** containerisation with multi-stage builds
+- **Docker Compose** for local development environment
+- **Environment-based configuration** management
+- **SQL Server** containerised for development
 
-## Demo Video
+## Key Features
 
-**[SkillForge Demo Video](https://www.youtube.com/watch?v=7qwzlWVy1w4)**
+### Authentication & User Management
+- Secure JWT-based authentication system
+- User profile management with image uploads
+- Protected routes and API endpoints
+- Time credit tracking and management
 
-### Video Content Overview
-- Project introduction and networking theme relevance
-- Demonstration of unique features and technical achievements
-- Live application walkthrough showing all basic and advanced requirements
-- Architecture overview highlighting Azure deployment and containerization
-
-## Advanced Features (MSA Requirements)
-
-### 1. Docker Containerization
-- **Multi-stage Docker builds** for optimized production images
-- **Container orchestration** with Azure Container Instances
-- **Environment-specific configurations** for development and production
-- **Automated deployment** using containerized architecture
-
-### 2. Real-time Communication (WebSockets)
-- **SignalR implementation** for live user interactions
-- **Real-time notifications** for exchange requests and updates
-- **Live online/offline status** indicators
-
-### 3. Advanced State Management (Redux)
-- **Redux Toolkit** for predictable state management
-- **Complex application state** handling across components
-- **Optimistic updates** for better user experience
-- **Centralized data flow** for scalable architecture
-
-## Core Features
-
-### User Management
-- Secure registration and authentication
-- JWT-based authorization
-- User profiles with skill management
-- Time credit system (earn by teaching, spend by learning)
-
-### Skill Exchange System
-- Browse available skills by category
-- Request skill exchanges with other users
-- Time credit transactions
-- Review and rating system
+### Intelligent Matching System
+- Sophisticated compatibility scoring based on skill overlap and user preferences
+- Recommendation engine analysing complementary skills and mutual learning opportunities
+- Advanced filtering by category, rating, and online status
+- Detailed compatibility analysis with skill-by-skill breakdown
 
 ### Real-time Features
-- Live notifications for exchange requests
-- Online/offline status indicators
-- Real-time updates via SignalR
+- User presence tracking and online/offline status indicators
+- Live activity feed showing recent user sign-ins and engagement
+- Real-time presence updates via SignalR WebSocket connections
+- Dynamic user interface updates without page refresh
 
-## Deployment
+### Skill Exchange Framework
+- Comprehensive skill catalog with categorisation and proficiency tracking
+- Exchange request system with detailed skill and user matching
+- Credit economy data modeling supporting balanced transactions
+- Meeting integration and scheduling framework
+- Dual-mode proficiency system enabling users to set different skill levels for teaching vs learning
 
-### Container Configuration
-- **Multi-stage Docker builds** for production optimization
-- **Environment-specific configurations** (development/production)
-- **Automated database migrations** on startup
-- **Health checks** for container monitoring
 
-## Local Development
+### Community & Discovery
+- Skill-based user discovery and browsing
+- User profile system with biographical information and skill showcases
+- Activity tracking and engagement metrics
+- Search and filtering capabilities across skills and users
+
+## Database Architecture
+
+- **Users**: Authentication credentials, profiles, time credits, biographical information
+- **Skills**: Categorised skill catalog with descriptions and metadata
+- **UserSkills**: User-skill relationships with proficiency levels and offering status
+- **SkillExchanges**: Complete exchange lifecycle management with status tracking
+- **Reviews**: Post-exchange rating and feedback system
+- **CreditTransactions**: Comprehensive audit trail for all credit movements
+
+## Getting Started
 
 ### Prerequisites
 - Docker Desktop
 - .NET 8 SDK (for local development)
 - Node.js 18+ (for local development)
 
-### Quick Start
+### Quick Start with Docker
 ```bash
-# Clone repository
-git clone [repository-url]
-cd skillforge
-
-# Start with Docker Compose
+# Clone and start (uses working defaults)
+git clone https://github.com/ChalithH/SkillForge-Enhanced.git
+cd SkillForge-Enhanced
+cp .env.example .env
 docker-compose up
 
-# Access locally
-# Frontend: http://localhost:3000
-# Backend: http://localhost:5000
+# Access the application
+# Frontend: http://localhost:3000  
+# Backend API: http://localhost:5000
+# Database: localhost:1433
 ```
 
-### Development Commands
-```bash
-# Backend (local development)
-cd backend
-dotnet run
-dotnet ef migrations add [MigrationName]
-dotnet ef database update
+*The `.env.example` file contains working defaults for local development. No editing required, though values can be customised if desired.*
 
-# Frontend (local development)  
+### Local Development Setup
+```bash
+# Backend development
+cd backend
+dotnet restore
+dotnet run
+
+# Frontend development (separate terminal)  
 cd frontend
 npm install
 npm run dev
-npm run build
 ```
 
-## Production Deployment
+## Technical Implementation Highlights
 
-The application is containerized and ready for cloud deployment:
+**Redux State Management**
+- Centralised application state with Redux Toolkit
+- RTK Query for efficient API caching and data synchronisation
+- Optimistic updates for seamless user experience
 
-```bash
-# Build production images
-docker build -t skillforge-backend ./backend
-docker build -t skillforge-frontend ./frontend
+**Real-time WebSocket Integration**  
+- SignalR implementation for user presence tracking
+- Live user presence and status updates
+- Real-time activity feed and user engagement tracking
 
-# Deploy to Azure Container Instances
-# Application deployed using Azure CLI and Docker commands
-```
+**Docker Containerisation**
+- Multi-stage builds for optimised production images
+- Development environment with hot-reload support
+- Comprehensive docker-compose configuration for all services
 
-## Technical Achievements
+## Development Practices
 
-### Performance & Scalability
-- **Container orchestration** with Azure Container Instances
-- **Database connection pooling** for efficient resource usage
-- **Static asset optimization** with nginx caching
-- **Responsive design** for mobile and desktop
-
-### Security
-- **JWT authentication** with secure token handling
-- **CORS configuration** for cross-origin security
-- **SQL injection prevention** via Entity Framework
-- **Input validation** on both frontend and backend
-
-### DevOps & Monitoring
-- **Health check endpoints** for monitoring
-- **Automated database migrations** 
-- **Environment-based configuration**
-- **Docker best practices** with multi-stage builds
-
-## Future Enhancements
-- Enhanced search and filtering
-- Email notifications for exchanges
-- Calendar integration
-- Mobile application
-- Advanced matching algorithms
+- **TypeScript** throughout for enhanced type safety and developer experience
+- **Responsive Design** with mobile-first approach using Tailwind CSS
+- **Error Boundaries** and comprehensive error handling for graceful failures
+- **Environment Configuration** management for different deployment stages
+- **Clean Architecture** with separation of concerns and dependency injection
 
 ---
 
-**Built with modern full-stack technologies and deployed to Microsoft Azure**
+**A skill exchange platform exploring time-credit economies and peer-to-peer learning**
+
+![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![.NET](https://img.shields.io/badge/.NET-8-purple?logo=dotnet)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
