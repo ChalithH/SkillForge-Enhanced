@@ -12,6 +12,7 @@ nupkg/
 *.suo
 *.user
 *.userprefs
+*.sln
 
 # Build results
 [Dd]ebug/
