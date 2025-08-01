@@ -127,12 +127,6 @@ export default function Dashboard() {
               <div className="lg:col-span-2">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-medium text-gray-900">Your Skills Preview</h3>
-                  <button
-                    onClick={() => setIsAddSkillModalOpen(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-                  >
-                    + Add Skill
-                  </button>
                 </div>
               
               {isLoading ? (
@@ -162,7 +156,10 @@ export default function Dashboard() {
                   <h4 className="text-lg font-medium text-gray-900 mb-2">No skills added yet</h4>
                   <p className="text-gray-500 mb-4">Start building your skill profile to connect with others</p>
                   <button
-                    onClick={() => setIsAddSkillModalOpen(true)}
+                    onClick={() => 
+                      // setIsAddSkillModalOpen(true)
+                      window.location.href = '/skills'
+                    }
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
                   >
                     Add Your First Skill

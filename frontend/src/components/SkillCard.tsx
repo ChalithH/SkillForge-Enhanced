@@ -4,7 +4,6 @@ interface SkillCardProps {
   skill: Skill;
   userSkill?: UserSkill;
   showActions?: boolean;
-  onEdit?: (userSkill: UserSkill) => void;
   onDelete?: (userSkillId: number) => void;
   onClick?: () => void;
 }
@@ -32,7 +31,6 @@ export default function SkillCard({
   skill, 
   userSkill, 
   showActions = false, 
-  onEdit, 
   onDelete, 
   onClick 
 }: SkillCardProps) {
@@ -98,17 +96,6 @@ export default function SkillCard({
         {/* Action buttons */}
         {showActions && userSkill && (
           <div className="flex flex-col space-y-2 ml-4">
-            {onEdit && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(userSkill);
-                }}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-              >
-                Edit
-              </button>
-            )}
             {onDelete && (
               <button
                 onClick={(e) => {

@@ -51,10 +51,6 @@ export default function MySkills() {
     }
   };
 
-  const handleEditSkill = (_userSkill: UserSkill) => {
-    // TODO: Implement edit modal - for now just show a placeholder
-    showSuccess('Edit functionality coming soon!');
-  };
 
   const handleDeleteSkill = async (userSkillId: number) => {
     try {
@@ -225,7 +221,6 @@ export default function MySkills() {
                     skill={userSkill.skill!}
                     userSkill={userSkill}
                     showActions={true}
-                    onEdit={handleEditSkill}
                     onDelete={handleDeleteSkill}
                   />
                 ))}
