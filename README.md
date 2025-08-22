@@ -100,8 +100,8 @@ The platform connects people based on complementary skills and learning interest
 
 ### Prerequisites
 - Docker Desktop
-- .NET 8 SDK (for local development)
-- Node.js 18+ (for local development)
+- Node.js 18+ (for frontend development)
+- VS Code with Dev Containers extension (recommended for backend C# development)
 
 ### Quick Start with Docker
 ```bash
@@ -119,18 +119,29 @@ docker-compose up
 
 *The `.env.example` file contains working defaults for local development. No editing required, though values can be customised if desired.*
 
-### Local Development Setup
-```bash
-# Backend development
-cd backend
-dotnet restore
-dotnet run
+### Development Workflow
 
-# Frontend development (separate terminal)  
+#### Hybrid Development Setup (Recommended)
+```bash
+# Start all services
+docker-compose up
+
+# Backend Development:
+# 1. Open project in VS Code
+# 2. Click "Reopen in Container" when prompted  
+# 3. Open any .cs file from the project (via VS Code Explorer), then hover over the loading circle next to C# icon in status bar and click "Open Solution", then select SkillForge.sln
+# 4. Develop with full C# IntelliSense and debugging in container
+
+# Frontend Development (separate terminal):
 cd frontend
-npm install
-npm run dev
+npm install  # Required for local TypeScript/React IntelliSense
+npm run dev  # Or edit files directly - hot reload works automatically
 ```
+
+#### Alternative: Fully Containerised Development
+- Use VS Code Dev Containers for both frontend and backend
+- Complete environment isolation with all tooling in containers
+- Slower performance but maximum consistency
 
 ## Technical Implementation Highlights
 
