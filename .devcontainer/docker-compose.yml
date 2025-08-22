@@ -1,0 +1,20 @@
+name: skillforge-devcontainer
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ..:/workspace/SkillForge-Enhanced:cached
+      - backend-nuget-cache:/root/.nuget/packages
+    working_dir: /workspace/SkillForge-Enhanced/backend
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=SkillForge;User=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true
+    networks:
+      - default
+
+volumes:
+  backend-nuget-cache:

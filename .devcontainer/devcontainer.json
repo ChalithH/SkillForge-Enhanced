@@ -1,0 +1,24 @@
+{
+  "name": "SkillForge Backend Editor",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "backend",
+  "runServices": ["backend"],
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime"
+      ],
+      "settings": {
+        "omnisharp.useModernNet": true,
+        "omnisharp.sdkPath": "/usr/share/dotnet",
+        "omnisharp.defaultLaunchSolution": "/workspace/SkillForge.sln"
+      }
+    }
+  },
+  "postCreateCommand": "cd /workspace/backend && dotnet restore && git config --global --add safe.directory /workspace",
+  "remoteUser": "root"
+}

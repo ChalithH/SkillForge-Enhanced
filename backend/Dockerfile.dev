@@ -6,15 +6,15 @@ RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 # Set working directory
-WORKDIR /app
+WORKDIR /workspace/backend
 
 # Copy csproj files and restore dependencies
 # This layer is cached unless csproj files change
-COPY *.csproj ./
+COPY backend/*.csproj ./
 RUN dotnet restore
 
 # Copy the rest of the application
-COPY . .
+COPY . /workspace
 
 # Ensure the NuGet packages directory is writable
 RUN mkdir -p /root/.nuget/packages && chmod -R 777 /root/.nuget

@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: backend/Dockerfile.dev
     ports:
       - "5000:5000"
     environment:
@@ -12,7 +12,7 @@ services:
       - JwtSettings__SecretKey=${JWT_SECRET_KEY}
       - JwtSettings__ExpirationInHours=24
     volumes:
-      - ./backend:/app
+      - .:/workspace
       - backend-nuget-cache:/root/.nuget/packages
     depends_on:
       sqlserver:
