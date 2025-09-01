@@ -1,8 +1,9 @@
-# SkillForge - Skill Exchange Platform
+# SkillForge (Archived Submission Repo)
 
-> Continued development of a skill exchange platform (original: July 2025)
-> 
-> **Initial Implementation**: [SkillForge-Original](https://github.com/ChalithH/SkillForge)
+> This repository was created as a **submission version** in July 2025.  
+> Ongoing development continues here: [SkillForge (Main Repo)](https://github.com/ChalithH/SkillForge)
+
+---
 
 ## About
 
@@ -175,4 +176,5 @@ npm run dev  # Or edit files directly - hot reload works automatically
 ![React](https://img.shields.io/badge/React-18-blue?logo=react)
 ![.NET](https://img.shields.io/badge/.NET-8-purple?logo=dotnet)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?logo=docker)
